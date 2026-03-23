@@ -1,0 +1,90 @@
+# Import libraries
+import numpy as np
+
+# -------------------------------
+# Step 1: Load Data
+# -------------------------------
+# Example: loading CSV file (replace with your dataset path)
+data = np.genfromtxt("loan-data.csv", 
+                     delimiter=',', 
+                     skip_header=1, 
+                     dtype=str)
+
+print("Raw Data:\n", data[:5])
+
+# -------------------------------
+# Step 2: Separate Header & Values
+# -------------------------------
+header = np.genfromtxt("loan-data.csv", 
+                       delimiter=',', 
+                       max_rows=1, 
+                       dtype=str)
+
+print("\nHeaders:\n", header)
+
+# -------------------------------
+# Step 3: Convert to Numeric where possible
+# -------------------------------
+data_numeric = np.genfromtxt("loan-data.csv", 
+                            delimiter=',', 
+                            skip_header=1)
+
+print("\nNumeric Data:\n", data_numeric[:5])
+
+# -------------------------------
+# Step 4: Handle Missing Values
+# -------------------------------
+# Replace nan with column mean
+col_means = np.nanmean(data_numeric, axis=0)
+
+# Find indices where nan exists
+inds = np.where(np.isnan(data_numeric))
+data_numeric[inds] = np.take(col_means, inds[1])
+
+print("\nData after handling missing values:\n", data_numeric[:5])
+
+# -------------------------------
+# Step 5: Basic Statistical Analysis
+# -------------------------------
+mean_values = np.mean(data_numeric, axis=0)
+median_values = np.median(data_numeric, axis=0)
+std_dev = np.std(data_numeric, axis=0)
+
+print("\nMean:\n", mean_values)
+print("\nMedian:\n", median_values)
+print("\nStandard Deviation:\n", std_dev)
+
+# -------------------------------
+# Step 6: Loan Risk Analysis (Example Logic)
+# -------------------------------
+# Assume column indices:
+# Loan Amount = 0, Interest Rate = 1, Income = 2
+
+loan_amount = data_numeric[:, 0]
+interest_rate = data_numeric[:, 1]
+income = data_numeric[:, 2]
+
+# High-risk condition: high loan + low income
+risk_condition = (loan_amount > np.mean(loan_amount)) & (income < np.mean(income))
+
+high_risk_loans = data_numeric[risk_condition]
+
+print("\nHigh Risk Loans:\n", high_risk_loans)
+
+# -------------------------------
+# Step 7: Filtering Data
+# -------------------------------
+# Loans with interest rate > average
+high_interest_loans = data_numeric[interest_rate > np.mean(interest_rate)]
+
+print("\nHigh Interest Loans:\n", high_interest_loans)
+
+# -------------------------------
+# Step 8: Save Clean Data
+# -------------------------------
+np.savetxt("cleaned_loan_data.csv", 
+           data_numeric, 
+           delimiter=",", 
+           fmt="%.2f")
+
+print("\nCleaned data saved successfully!")
